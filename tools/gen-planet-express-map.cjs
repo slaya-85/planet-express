@@ -37,6 +37,13 @@ const T = {
   bayFloor: gid(6, 0),
   cautionFloor: gid(7, 0),
   cableFloor: gid(8, 0),
+  labFloorDot: gid(9, 0),
+  opsFloorPanel: gid(10, 0),
+  hangarFloorStripe: gid(11, 0),
+  briefingFloorPanel: gid(12, 0),
+  breakFloorTrim: gid(13, 0),
+  corridorLight: gid(14, 0),
+  serviceFloor: gid(15, 0),
 
   wallTop: gid(0, 1),
   wallMid: gid(1, 1),
@@ -48,6 +55,8 @@ const T = {
   window: gid(7, 1),
   pipeWall: gid(8, 1),
   vent: gid(9, 1),
+  hazardWall: gid(10, 1),
+  wallPanel: gid(11, 1),
 
   deskLeft: gid(0, 2),
   deskMid: gid(1, 2),
@@ -74,6 +83,11 @@ const T = {
   pipeVertical: gid(9, 4),
   pipeHorizontal: gid(10, 4),
   server: gid(11, 4),
+  sparkCoil: gid(12, 4),
+  reactorTop: gid(13, 4),
+  reactorBottom: gid(13, 5),
+  oscilloscope: gid(14, 4),
+  sampleRack: gid(15, 4),
 
   tableLeft: gid(0, 5),
   tableRight: gid(1, 5),
@@ -99,6 +113,25 @@ const T = {
   barrel: gid(7, 7),
   hangarDoor: gid(8, 7),
   cargoBay: gid(9, 7),
+  shipNoseTop: gid(0, 9),
+  shipNoseMid: gid(0, 10),
+  shipNoseBot: gid(0, 11),
+  shipBodyTop: gid(1, 9),
+  shipBodyMid: gid(1, 10),
+  shipBodyBot: gid(1, 11),
+  shipCockpitTop: gid(2, 9),
+  shipCockpitMid: gid(2, 10),
+  shipTailTop: gid(3, 9),
+  shipTailMid: gid(3, 10),
+  shipTailBot: gid(3, 11),
+  shipThrusterTop: gid(4, 9),
+  shipThrusterMid: gid(4, 10),
+  shipThrusterBot: gid(4, 11),
+  landingGear: gid(5, 11),
+  loader: gid(6, 9),
+  pallet: gid(6, 10),
+  gantry: gid(7, 9),
+  crane: gid(7, 10),
 
   calendar: gid(0, 8),
   board: gid(1, 8),
@@ -194,6 +227,19 @@ function fillRect(layer, x, y, w, h, value) {
   for (let yy = y; yy < y + h; yy++) {
     for (let xx = x; xx < x + w; xx++) set(layer, xx, yy, value);
   }
+}
+
+function checker(layer, x, y, w, h, a, b, stride = 2) {
+  for (let yy = y; yy < y + h; yy++) {
+    for (let xx = x; xx < x + w; xx++) {
+      if ((Math.floor(xx / stride) + Math.floor(yy / stride)) % 2 === 0) set(layer, xx, yy, a);
+      else set(layer, xx, yy, b);
+    }
+  }
+}
+
+function scatter(layer, tiles, value) {
+  for (const [x, y] of tiles) set(layer, x, y, value);
 }
 
 function block(collision, x, y) {
@@ -300,7 +346,18 @@ function buildMap() {
   fillRect(floor, 19, 10, 13, 15, T.opsFloor);
   fillRect(floor, 1, 13, 18, 13, T.hangarFloor);
   fillRect(floor, 33, 10, 10, 14, T.breakFloor);
+  fillRect(floor, 33, 1, 10, 9, T.serviceFloor);
   fillRect(floor, 20, 25, 4, 2, T.bayFloor);
+
+  checker(floor, 2, 2, 11, 8, T.labFloor, T.labFloorDot, 2);
+  checker(floor, 16, 2, 15, 7, T.briefingFloor, T.briefingFloorPanel, 3);
+  checker(floor, 20, 11, 11, 13, T.opsFloor, T.opsFloorPanel, 2);
+  checker(floor, 2, 14, 15, 11, T.hangarFloor, T.hangarFloorStripe, 3);
+  checker(floor, 34, 11, 8, 11, T.breakFloor, T.breakFloorTrim, 3);
+  checker(floor, 34, 2, 8, 7, T.serviceFloor, T.opsFloorPanel, 2);
+  scatter(floor, [[12, 5], [13, 5], [9, 8], [10, 8], [15, 20], [16, 20], [24, 16], [25, 16], [26, 16], [36, 6], [37, 6]], T.cableFloor);
+  scatter(floor, [[19, 25], [20, 25], [23, 25], [24, 25], [2, 15], [3, 15], [12, 21], [13, 21], [14, 21], [15, 21], [16, 21]], T.cautionFloor);
+  scatter(floor, [[21, 26], [22, 26], [13, 8], [22, 10], [33, 16], [18, 21], [31, 16]], T.corridorLight);
 
   for (let x = 0; x < W; x++) {
     const isEntrance = x >= 20 && x <= 23;
@@ -326,20 +383,59 @@ function buildMap() {
   for (let x = 2; x <= 12; x += 2) set(walls, x, 0, T.window);
   for (let x = 16; x <= 30; x += 3) set(walls, x, 0, T.glassLit);
   for (let y = 17; y <= 23; y += 2) set(walls, 0, y, T.hangarDoor);
+  for (const [x, y] of [[3, 10], [6, 10], [9, 10], [17, 10], [27, 10], [31, 10], [32, 11], [32, 13], [32, 19], [32, 21], [18, 16], [18, 24]]) {
+    set(walls, x, y, T.hazardWall);
+  }
+  for (const [x, y] of [[35, 0], [38, 0], [41, 0], [43, 3], [43, 6], [43, 11], [43, 14], [43, 20], [4, 0], [8, 0], [12, 0]]) {
+    set(walls, x, y, T.pipeWall);
+  }
+  for (const [x, y] of [[19, 0], [24, 0], [29, 0], [34, 0], [39, 0], [0, 4], [0, 8], [0, 12], [0, 26]]) {
+    set(walls, x, y, T.vent);
+  }
+  for (const [x, y] of [[15, 10], [16, 10], [24, 10], [25, 10], [33, 10], [34, 10], [39, 10], [40, 10]]) {
+    set(walls, x, y, T.wallPanel);
+  }
 
   prop(above, collision, 4, 3, T.consoleLeft);
   prop(above, collision, 5, 3, T.consoleMid);
   prop(above, collision, 6, 3, T.consoleRight);
+  prop(above, collision, 2, 2, T.oscilloscope);
+  prop(above, collision, 3, 2, T.labBenchLeft);
+  prop(above, collision, 4, 2, T.labBenchMid);
+  prop(above, collision, 5, 2, T.labBenchRight);
   prop(above, collision, 10, 3, T.tubeTop);
   prop(above, collision, 10, 4, T.tubeBottom);
   prop(above, collision, 3, 11, T.tank);
+  prop(above, collision, 5, 8, T.reactorTop);
+  prop(above, collision, 5, 9, T.reactorBottom);
+  prop(above, collision, 2, 7, T.sparkCoil);
+  prop(above, collision, 11, 2, T.sampleRack);
+  prop(above, collision, 12, 2, T.labBenchLeft);
+  prop(above, collision, 13, 2, T.labBenchRight);
   prop(above, collision, 12, 3, T.server);
+  for (const [x, y, tile] of [
+    [2, 4, T.pipeHorizontal], [3, 4, T.pipeHorizontal], [7, 3, T.pipeVertical],
+    [7, 4, T.pipeVertical], [9, 2, T.pipeHorizontal], [10, 2, T.pipeHorizontal],
+    [11, 4, T.pipeVertical], [13, 4, T.pipeVertical],
+  ]) set(above, x, y, tile);
   set(above, 5, 1, T.planetSign);
 
   prop(above, collision, 20, 2, T.board);
   prop(above, collision, 21, 2, T.board);
   prop(above, collision, 22, 2, T.board);
   prop(above, collision, 26, 2, T.calendar);
+  prop(above, collision, 16, 2, T.consoleLeft);
+  prop(above, collision, 17, 2, T.consoleMid);
+  prop(above, collision, 18, 2, T.consoleRight);
+  prop(above, collision, 28, 2, T.oscilloscope);
+  prop(above, collision, 29, 2, T.server);
+  prop(above, collision, 30, 2, T.sampleRack);
+  for (const [x, y] of [[17, 7], [18, 7], [25, 5], [25, 6], [27, 7], [30, 6]]) {
+    set(below, x, y, T.cafeChair);
+  }
+  for (const [x, y] of [[16, 8], [18, 8], [25, 8], [28, 8], [30, 8]]) {
+    set(floor, x, y, T.floorLight);
+  }
   prop(below, collision, 20, 5, T.tableLeft);
   prop(below, collision, 21, 5, T.tableRight);
   prop(below, collision, 22, 5, T.tableLeft);
@@ -349,16 +445,58 @@ function buildMap() {
   prop(below, collision, 22, 6, T.tableLeft);
   prop(below, collision, 23, 6, T.tableRight);
 
+  prop(above, collision, 34, 2, T.server);
+  prop(above, collision, 35, 2, T.server);
+  prop(above, collision, 36, 2, T.oscilloscope);
+  prop(above, collision, 40, 2, T.reactorTop);
+  prop(above, collision, 40, 3, T.reactorBottom);
+  prop(above, collision, 41, 5, T.consoleLeft);
+  prop(above, collision, 41, 6, T.consoleMid);
+  prop(above, collision, 41, 7, T.consoleRight);
+  for (const [x, y, tile] of [
+    [34, 4, T.pipeHorizontal], [35, 4, T.pipeHorizontal], [36, 4, T.pipeHorizontal],
+    [37, 4, T.pipeHorizontal], [38, 4, T.pipeHorizontal], [39, 4, T.pipeHorizontal],
+    [38, 2, T.pipeVertical], [38, 3, T.pipeVertical], [38, 5, T.pipeVertical],
+    [34, 7, T.floorLight], [36, 7, T.floorLight], [39, 7, T.floorLight],
+  ]) set(y === 7 ? floor : above, x, y, tile);
+
   for (const [, x, y] of PRIMARY_SEATS) addDesk(below, above, collision, x, y);
 
-  for (let x = 4; x <= 13; x++) set(below, x, 18, x === 4 ? T.shipNose : x === 13 ? T.shipTail : x === 8 ? T.shipWindow : T.shipBody);
-  for (let x = 5; x <= 12; x++) set(below, x, 19, x === 12 ? T.thruster : T.shipBody);
-  prop(above, collision, 5, 17, T.shipFin);
-  prop(above, collision, 12, 17, T.shipFin);
-  for (let y = 18; y <= 19; y++) {
-    for (let x = 4; x <= 13; x++) block(collision, x, y);
+  for (const [x, y, tile] of [
+    [19, 11, T.consoleLeft], [20, 11, T.consoleMid], [23, 12, T.consoleRight],
+    [31, 11, T.server], [31, 13, T.oscilloscope], [31, 21, T.sampleRack],
+    [19, 21, T.reactorTop], [19, 22, T.reactorBottom],
+  ]) prop(above, collision, x, y, tile);
+  for (const [x, y, tile] of [
+    [22, 15, T.pipeHorizontal], [23, 15, T.pipeHorizontal], [24, 15, T.pipeHorizontal],
+    [27, 17, T.pipeVertical], [27, 18, T.pipeVertical], [28, 18, T.pipeHorizontal],
+    [29, 18, T.pipeHorizontal], [21, 22, T.floorLight], [24, 22, T.floorLight],
+    [27, 23, T.floorLight], [30, 19, T.cableFloor],
+  ]) set(tile === T.floorLight || tile === T.cableFloor ? floor : above, x, y, tile);
+
+  const shipRows = [
+    [T.shipNoseTop, T.shipBodyTop, T.shipBodyTop, T.shipCockpitTop, T.shipCockpitTop, T.shipBodyTop, T.shipBodyTop, T.shipTailTop, T.shipThrusterTop],
+    [T.shipNoseMid, T.shipBodyMid, T.shipBodyMid, T.shipCockpitMid, T.shipCockpitMid, T.shipBodyMid, T.shipBodyMid, T.shipTailMid, T.shipThrusterMid],
+    [T.shipNoseBot, T.shipBodyBot, T.shipBodyBot, T.shipBodyBot, T.shipBodyBot, T.shipBodyBot, T.shipBodyBot, T.shipTailBot, T.shipThrusterBot],
+    [0, T.shipBodyBot, T.shipBodyBot, T.shipBodyBot, T.shipBodyBot, T.shipBodyBot, T.shipTailBot, T.thruster, 0],
+  ];
+  for (let yy = 0; yy < shipRows.length; yy++) {
+    for (let xx = 0; xx < shipRows[yy].length; xx++) {
+      const tile = shipRows[yy][xx];
+      if (!tile) continue;
+      set(below, 3 + xx, 16 + yy, tile);
+      block(collision, 3 + xx, 16 + yy);
+    }
   }
-  for (const [x, y] of [[3, 22], [4, 22], [15, 15], [16, 15], [7, 24], [9, 24]]) prop(below, collision, x, y, T.crate);
+  prop(above, collision, 5, 15, T.shipFin);
+  prop(above, collision, 10, 15, T.shipFin);
+  prop(below, collision, 5, 20, T.landingGear);
+  prop(below, collision, 10, 20, T.landingGear);
+  prop(below, collision, 13, 15, T.loader);
+  prop(below, collision, 14, 15, T.pallet);
+  prop(above, collision, 16, 16, T.gantry);
+  prop(above, collision, 16, 17, T.crane);
+  for (const [x, y] of [[3, 22], [4, 22], [7, 24], [9, 24], [12, 23], [15, 23]]) prop(below, collision, x, y, T.crate);
   prop(below, collision, 2, 24, T.barrel);
   prop(below, collision, 16, 24, T.cargoBay);
   set(floor, 19, 25, T.cautionFloor);
@@ -625,6 +763,24 @@ function makeTilesetPng() {
   floorTile(T.breakFloor, PALETTE.green, PALETTE.teal);
   floorTile(T.corridorFloor, PALETTE.metalDark, PALETTE.shadow);
   floorTile(T.bayFloor, PALETTE.blue, PALETTE.aqua);
+  floorTile(T.labFloorDot, PALETTE.mint, PALETTE.teal);
+  rect(T.labFloorDot, 3, 3, 2, 2, PALETTE.aqua);
+  rect(T.labFloorDot, 11, 11, 2, 2, PALETTE.aqua);
+  floorTile(T.opsFloorPanel, PALETTE.metal, PALETTE.shadow);
+  rect(T.opsFloorPanel, 2, 2, 12, 12, PALETTE.metalDark);
+  rect(T.opsFloorPanel, 4, 4, 8, 1, PALETTE.aqua);
+  floorTile(T.hangarFloorStripe, PALETTE.shadow, PALETTE.metalDark);
+  rect(T.hangarFloorStripe, 0, 12, TS, 2, PALETTE.yellow);
+  floorTile(T.briefingFloorPanel, PALETTE.cream, PALETTE.metal);
+  rect(T.briefingFloorPanel, 3, 3, 10, 10, PALETTE.white);
+  border(T.briefingFloorPanel, PALETTE.metal);
+  floorTile(T.breakFloorTrim, PALETTE.green, PALETTE.teal);
+  rect(T.breakFloorTrim, 0, 0, TS, 2, PALETTE.cream);
+  floorTile(T.corridorLight, PALETTE.metalDark, PALETTE.shadow);
+  rect(T.corridorLight, 4, 6, 8, 4, PALETTE.aqua);
+  floorTile(T.serviceFloor, PALETTE.blue, PALETTE.metalDark);
+  rect(T.serviceFloor, 2, 2, 4, 12, PALETTE.teal);
+  rect(T.serviceFloor, 10, 2, 4, 12, PALETTE.orange);
   fill(T.cautionFloor, PALETTE.shadow);
   for (let i = 0; i < TS; i += 4) rect(T.cautionFloor, i, 0, 2, TS, PALETTE.yellow);
   fill(T.cableFloor, PALETTE.metalDark);
@@ -643,7 +799,7 @@ function makeTilesetPng() {
   rect(T.glassLit, 2, 2, 10, 3, PALETTE.white);
   fill(T.door, PALETTE.orange);
   border(T.door, PALETTE.ink);
-  fill(T.openDoor, PALETTE.corridorFloor || PALETTE.metalDark);
+  fill(T.openDoor, PALETTE.metalDark);
   rect(T.openDoor, 0, 0, TS, 3, PALETTE.orange);
   fill(T.window, PALETTE.black);
   rect(T.window, 2, 2, 12, 10, PALETTE.blue);
@@ -652,23 +808,38 @@ function makeTilesetPng() {
   rect(T.pipeWall, 7, 0, 3, TS, PALETTE.orange);
   fill(T.vent, PALETTE.ink);
   for (let y = 4; y <= 11; y += 3) rect(T.vent, 3, y, 10, 1, PALETTE.metal);
+  fill(T.hazardWall, PALETTE.ink);
+  border(T.hazardWall, PALETTE.metal);
+  for (let i = -4; i < TS; i += 5) rect(T.hazardWall, i, 2, 3, 12, PALETTE.yellow);
+  fill(T.wallPanel, PALETTE.ink);
+  border(T.wallPanel, PALETTE.metal);
+  rect(T.wallPanel, 3, 3, 10, 3, PALETTE.blue);
+  rect(T.wallPanel, 3, 8, 10, 2, PALETTE.aqua);
 
   for (const desk of [T.deskLeft, T.deskMid, T.deskRight]) {
-    fill(desk, PALETTE.orange);
+    fill(desk, PALETTE.metalDark);
     border(desk, PALETTE.ink);
-    rect(desk, 1, 1, 14, 3, PALETTE.yellow);
+    rect(desk, 1, 1, 14, 3, PALETTE.metal);
+    rect(desk, 2, 5, 12, 6, PALETTE.blue);
+    rect(desk, 4, 7, 3, 2, PALETTE.aqua);
+    rect(desk, 9, 7, 2, 2, PALETTE.yellow);
+    rect(desk, 12, 7, 1, 2, PALETTE.red);
   }
-  fill(T.chair, PALETTE.purple);
-  rect(T.chair, 4, 4, 8, 8, PALETTE.blue);
+  fill(T.chair, PALETTE.transparent);
+  rect(T.chair, 4, 4, 8, 8, PALETTE.purple);
+  rect(T.chair, 5, 5, 6, 5, PALETTE.blue);
   const monitorOff = (tileGid) => {
     fill(tileGid, PALETTE.transparent);
-    rect(tileGid, 2, 3, 12, 9, PALETTE.black);
+    rect(tileGid, 1, 2, 14, 10, PALETTE.black);
+    rect(tileGid, 2, 3, 12, 8, PALETTE.blue);
+    rect(tileGid, 5, 12, 6, 2, PALETTE.metalDark);
     border(tileGid, PALETTE.metal);
   };
   const monitorOn = (tileGid) => {
     monitorOff(tileGid);
-    rect(tileGid, 4, 5, 8, 4, PALETTE.aqua);
-    rect(tileGid, 5, 10, 5, 1, PALETTE.green);
+    rect(tileGid, 3, 4, 10, 4, PALETTE.aqua);
+    rect(tileGid, 4, 9, 3, 1, PALETTE.green);
+    rect(tileGid, 8, 9, 4, 1, PALETTE.yellow);
   };
   [T.monitorOffTl, T.monitorOffTr, T.monitorOffBl, T.monitorOffBr].forEach(monitorOff);
   [T.monitorOnTl, T.monitorOnTr, T.monitorOnBl, T.monitorOnBr].forEach(monitorOn);
@@ -701,6 +872,32 @@ function makeTilesetPng() {
   border(T.server, PALETTE.metal);
   rect(T.server, 4, 3, 2, 2, PALETTE.green);
   rect(T.server, 9, 3, 2, 2, PALETTE.red);
+  fill(T.sparkCoil, PALETTE.transparent);
+  rect(T.sparkCoil, 6, 2, 4, 12, PALETTE.metal);
+  rect(T.sparkCoil, 3, 4, 10, 2, PALETTE.aqua);
+  rect(T.sparkCoil, 4, 9, 8, 1, PALETTE.yellow);
+  fill(T.reactorTop, PALETTE.metalDark);
+  border(T.reactorTop, PALETTE.metal);
+  rect(T.reactorTop, 3, 3, 10, 10, PALETTE.aqua);
+  rect(T.reactorTop, 6, 5, 4, 6, PALETTE.green);
+  fill(T.reactorBottom, PALETTE.metalDark);
+  border(T.reactorBottom, PALETTE.metal);
+  rect(T.reactorBottom, 3, 1, 10, 8, PALETTE.aqua);
+  rect(T.reactorBottom, 2, 11, 12, 3, PALETTE.orange);
+  fill(T.oscilloscope, PALETTE.metalDark);
+  border(T.oscilloscope, PALETTE.metal);
+  rect(T.oscilloscope, 3, 3, 10, 6, PALETTE.black);
+  rect(T.oscilloscope, 4, 6, 2, 1, PALETTE.aqua);
+  rect(T.oscilloscope, 6, 5, 2, 1, PALETTE.aqua);
+  rect(T.oscilloscope, 8, 7, 3, 1, PALETTE.aqua);
+  rect(T.oscilloscope, 4, 11, 2, 2, PALETTE.red);
+  rect(T.oscilloscope, 10, 11, 2, 2, PALETTE.yellow);
+  fill(T.sampleRack, PALETTE.cream);
+  border(T.sampleRack, PALETTE.metalDark);
+  for (let x = 3; x <= 11; x += 4) {
+    rect(T.sampleRack, x, 3, 2, 9, PALETTE.aqua);
+    rect(T.sampleRack, x - 1, 11, 4, 2, PALETTE.metal);
+  }
 
   for (const table of [T.tableLeft, T.tableRight]) {
     fill(table, PALETTE.cream);
@@ -762,6 +959,64 @@ function makeTilesetPng() {
   rect(T.hangarDoor, 11, 0, 2, TS, PALETTE.metal);
   fill(T.cargoBay, PALETTE.metal);
   border(T.cargoBay, PALETTE.yellow);
+
+  const shipGreen = [111, 202, 118, 255];
+  const shipShade = [66, 148, 94, 255];
+  const shipLight = [198, 245, 176, 255];
+  for (const tile of [
+    T.shipNoseTop, T.shipNoseMid, T.shipNoseBot,
+    T.shipBodyTop, T.shipBodyMid, T.shipBodyBot,
+    T.shipCockpitTop, T.shipCockpitMid,
+    T.shipTailTop, T.shipTailMid, T.shipTailBot,
+  ]) {
+    fill(tile, PALETTE.transparent);
+    rect(tile, 0, 2, TS, 12, shipGreen);
+    rect(tile, 0, 11, TS, 3, shipShade);
+    border(tile, PALETTE.ink);
+  }
+  rect(T.shipNoseTop, 0, 0, 4, TS, PALETTE.transparent);
+  rect(T.shipNoseTop, 4, 1, 12, 4, shipLight);
+  rect(T.shipNoseMid, 0, 2, 2, 12, PALETTE.transparent);
+  rect(T.shipNoseMid, 2, 3, 14, 9, shipGreen);
+  rect(T.shipNoseBot, 0, 0, 5, 6, PALETTE.transparent);
+  rect(T.shipNoseBot, 5, 6, 11, 7, shipShade);
+  rect(T.shipBodyTop, 0, 2, TS, 3, shipLight);
+  rect(T.shipBodyMid, 0, 4, TS, 6, shipGreen);
+  rect(T.shipBodyBot, 0, 1, TS, 9, shipShade);
+  rect(T.shipCockpitTop, 1, 2, 14, 10, PALETTE.aqua);
+  rect(T.shipCockpitTop, 3, 4, 4, 6, PALETTE.white);
+  rect(T.shipCockpitMid, 1, 0, 14, 8, PALETTE.aqua);
+  rect(T.shipCockpitMid, 2, 9, 12, 4, shipGreen);
+  rect(T.shipTailTop, 0, 2, 12, 8, PALETTE.red);
+  rect(T.shipTailTop, 12, 5, 4, 7, shipGreen);
+  rect(T.shipTailMid, 0, 3, 13, 9, PALETTE.red);
+  rect(T.shipTailBot, 0, 0, 11, 10, PALETTE.red);
+  for (const tile of [T.shipThrusterTop, T.shipThrusterMid, T.shipThrusterBot]) {
+    fill(tile, PALETTE.transparent);
+    rect(tile, 0, 4, 10, 8, PALETTE.metalDark);
+    rect(tile, 10, 5, 5, 6, PALETTE.orange);
+    rect(tile, 13, 6, 3, 4, PALETTE.yellow);
+    border(tile, PALETTE.ink);
+  }
+  fill(T.landingGear, PALETTE.transparent);
+  rect(T.landingGear, 5, 0, 3, 12, PALETTE.metalDark);
+  rect(T.landingGear, 2, 11, 11, 3, PALETTE.black);
+  fill(T.loader, PALETTE.orange);
+  border(T.loader, PALETTE.ink);
+  rect(T.loader, 2, 3, 12, 3, PALETTE.yellow);
+  rect(T.loader, 4, 10, 8, 3, PALETTE.metalDark);
+  fill(T.pallet, PALETTE.metalDark);
+  border(T.pallet, PALETTE.orange);
+  rect(T.pallet, 2, 4, 12, 2, PALETTE.cream);
+  rect(T.pallet, 2, 9, 12, 2, PALETTE.cream);
+  fill(T.gantry, PALETTE.transparent);
+  rect(T.gantry, 2, 0, 3, TS, PALETTE.metal);
+  rect(T.gantry, 10, 0, 3, TS, PALETTE.metal);
+  rect(T.gantry, 0, 2, TS, 3, PALETTE.yellow);
+  fill(T.crane, PALETTE.transparent);
+  rect(T.crane, 2, 0, 3, TS, PALETTE.metal);
+  rect(T.crane, 5, 3, 8, 3, PALETTE.yellow);
+  rect(T.crane, 12, 6, 2, 6, PALETTE.ink);
 
   fill(T.calendar, PALETTE.white);
   border(T.calendar, PALETTE.red);
