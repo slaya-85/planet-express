@@ -6,7 +6,11 @@ import { Icon } from './Icon';
 import { ProviderLogo } from './ProviderLogo';
 import { useStore, type Agent } from '@/store/store';
 import { type CharacterName } from '@/scene/office/cast';
-import { getTheme, themeCastMembers } from '@/scene/office/themeRegistry';
+import {
+  getTheme,
+  resolveThemeWorkerCharacter,
+  themeWorkerCastMembers,
+} from '@/scene/office/themeRegistry';
 import { type AccentColorName } from '@/design/tokens';
 import type { HireManifest } from '@shared/hire';
 import { MCP_CATALOG } from '@shared/mcpCatalog';
@@ -142,14 +146,15 @@ export function AddAgentModal({ onClose, config, onConfigChange }: AddAgentModal
   const addAgent = useStore(s => s.addAgent);
   const officeTheme = useStore(s => s.officeTheme);
   const theme = getTheme(officeTheme);
-  const castMembers = themeCastMembers(officeTheme);
-  const defaultCastMember = theme.cast.byName[theme.cast.defaultCharacter] ?? castMembers[0];
+  const castMembers = themeWorkerCastMembers(officeTheme);
+  const defaultCharacter = resolveThemeWorkerCharacter(officeTheme);
+  const defaultCastMember = theme.cast.byName[defaultCharacter] ?? castMembers[0];
   // A validated hire manifest (deep link / file import) seeds the form. Manifests
   // NEVER auto-spawn — the human reviews every field (esp. the command) first.
   const pendingHire = useStore(s => s.pendingHire);
 
   const knownCharacter = (c?: string): CharacterName =>
-    (castMembers.some(m => m.name === c) ? (c as CharacterName) : theme.cast.defaultCharacter);
+    resolveThemeWorkerCharacter(officeTheme, c as CharacterName | undefined);
   const knownAccent = (a?: string): AccentColorName =>
     (ACCENTS.includes(a as AccentColorName) ? (a as AccentColorName) : 'sky');
   /** The locally-built spawn command for a manifest: provider preset + model

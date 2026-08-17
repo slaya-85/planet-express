@@ -26,7 +26,11 @@ import {
   type OfficeCharacterName,
   type PlanetExpressCharacterName,
 } from './cast';
-import { resolveThemeCharacter as resolveThemeCharacterForTheme } from './themeCharacterResolver';
+import {
+  resolveThemeCharacter as resolveThemeCharacterForTheme,
+  resolveThemeWorkerCharacter as resolveThemeWorkerCharacterForTheme,
+  themeWorkerCastMembers as themeWorkerCastMembersForTheme,
+} from './themeCharacterResolver';
 
 import officeTilesetUrl from '@/assets/tilesets/office-tileset.png?url';
 import a5FloorsWallsUrl from '@/assets/tilesets/a5-office-floors-walls.png?url';
@@ -348,9 +352,17 @@ export function themeCastMembers(id: ThemeId): CastMember<CharacterName>[] {
   return Object.values(getTheme(id).cast.byName) as CastMember<CharacterName>[];
 }
 
+export function themeWorkerCastMembers(id: ThemeId): CastMember<CharacterName>[] {
+  return themeWorkerCastMembersForTheme(getTheme(id)) as CastMember<CharacterName>[];
+}
+
 export function resolveThemeCharacter(
   id: ThemeId,
   subject: { id: string; character?: CharacterName; isGod?: boolean },
 ): CharacterName {
   return resolveThemeCharacterForTheme(getTheme(id), subject);
+}
+
+export function resolveThemeWorkerCharacter(id: ThemeId, character?: CharacterName): CharacterName {
+  return resolveThemeWorkerCharacterForTheme(getTheme(id), character);
 }
