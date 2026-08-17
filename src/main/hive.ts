@@ -1,4 +1,4 @@
-﻿/**
+/**
  * The Hive — the on-disk multi-agent coordination layer.
  *
  * Lives under `<harnessHome>/hive/` as a single git repo that ONLY this main

@@ -1,4 +1,4 @@
-﻿import { PixelPanel } from '@/components/PixelPanel';
+import { PixelPanel } from '@/components/PixelPanel';
 import { getTheme, PRIMARY_THEME_ID } from '@/scene/office/themeRegistry';
 
 /**

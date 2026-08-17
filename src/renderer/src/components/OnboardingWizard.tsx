@@ -194,7 +194,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             step === 'persona' ? 'WELCOME TO PLANET EXPRESS'
             : step === 'welcome' ? 'MEET THE CREW'
             : step === 'home' ? (plain ? 'STEP 1 OF 4 · A HOME FOR THE APP' : 'STEP 1 OF 4 · HARNESS HOME')
-            : step === 'orchestrator' ? (plain ? "STEP 2 OF 4 · YOUR CLONE" : "STEP 2 OF 4 · YOUR CLONE'S ENGINE")
+            : step === 'orchestrator' ? (plain ? "STEP 2 OF 4 · FARNSWORTH" : "STEP 2 OF 4 · FARNSWORTH'S ENGINE")
             : step === 'repos' ? (plain ? 'STEP 3 OF 4 · YOUR PROJECTS' : 'STEP 3 OF 4 · YOUR REPOS')
             : step === 'permissions' ? 'STEP 4 OF 4 · PERMISSIONS & RELIABILITY'
             : 'ALL SET'
@@ -216,7 +216,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                   </div>
                   <div>
                     <div style={{ fontFamily: 'var(--cth-font-display)', fontSize: 12, lineHeight: '18px' }}>
-                      A CLONE OF YOU, WORKING 24/7
+                      PLANET EXPRESS, WORKING 24/7
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--cth-ink-700)', lineHeight: '19px' }}>
                       Planet Express turns the CLI agent you already use into a persistent dispatcher —
@@ -265,11 +265,11 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     <div style={{
                       fontFamily: 'var(--cth-font-display)',
                       fontSize: 12, lineHeight: '18px'
-                    }}>YOUR CLONE AND THE FLOOR IT RUNS</div>
+                    }}>FARNSWORTH AND THE CREW</div>
                     <div style={{ fontSize: 12, color: 'var(--cth-ink-700)', lineHeight: '18px' }}>
                       {plain
-                        ? "Your clone runs a small office of AI workers, and you watch it all from one screen. Here's what's inside:"
-                        : "Your clone coordinates a hive of AI coding agents — persistent, watchable, all local. Here's what's inside:"}
+                        ? `${boss.name} runs a crew of AI workers, and you watch it all from one screen. Here's what's inside:`
+                        : `${boss.name} coordinates a hive of AI coding agents - persistent, watchable, all local. Here's what's inside:`}
                     </div>
                   </div>
                 </div>
@@ -363,7 +363,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                   )}
                 </p>
 
-                {/* What is a CLI agent / your clone — item 3 */}
+                {/* What is a CLI agent / orchestrator - item 3 */}
                 <div style={{
                   display: 'flex', gap: 8, alignItems: 'flex-start', padding: 10,
                   background: 'var(--cth-lemon-light)', boxShadow: 'inset 0 0 0 1px var(--cth-ink-300)',
@@ -374,8 +374,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     {plain ? (
                       <>A <strong>CLI agent</strong> is an AI coding assistant that runs on your
                       computer — popular ones are Claude Code (Anthropic), Codex (OpenAI) and
-                      Antigravity (Google Gemini). <strong>Your clone</strong> is the always-on
-                      one that runs your whole office. We recommend Claude Code on Opus 4.8 (1M).
+                      Antigravity (Google Gemini). <strong>{boss.name}</strong> is the always-on
+                      orchestrator who runs the crew. We recommend Claude Code on Opus 4.8 (1M).
                       You can add or switch the others later.</>
                     ) : (
                       <>Each option is a <strong>CLI engine</strong> you have installed (Claude Code,

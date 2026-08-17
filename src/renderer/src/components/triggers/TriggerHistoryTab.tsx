@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { PixelButton } from '../PixelButton';
 import type { TriggerHistoryEntry } from '@shared/triggers';
 import { getTheme, PRIMARY_THEME_ID } from '@/scene/office/themeRegistry';
@@ -356,7 +356,7 @@ const SECTIONS: { key: Source; label: string; blurb: string }[] = [
   {
     key: 'org',
     label: 'Organization',
-    blurb: `Messages from your teammates' clone nodes, next to what ${getTheme(PRIMARY_THEME_ID).boss.name} sent back.`
+    blurb: `Messages from your teammates' Planet Express nodes, next to what ${getTheme(PRIMARY_THEME_ID).boss.name} sent back.`
   }
 ];
 
@@ -508,7 +508,7 @@ export function TriggerHistoryTab() {
             <EmptyState
               title="Nothing here yet, and nothing is broken."
               body={'Teammate messaging is not built yet. You can set an org key and pick a mode '
-                + 'today, but no one’s clone node can reach yours until the transport ships. '
+                + 'today, but no one’s Planet Express node can reach yours until the transport ships. '
                 + 'When it does, their messages and our replies land here.'}
             />
           ) : (
