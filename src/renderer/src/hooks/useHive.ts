@@ -19,7 +19,7 @@ import type { AgentProvider } from '../../../shared/agentProvider';
 import { acquireTerminal, resetTerminal, isTerminalAutomationSafe } from '@/components/terminalPool';
 import { deliverWithAcknowledgement } from './queueDelivery';
 import { DEFAULT_CHARACTER } from '@/scene/office/cast';
-import { getTheme, themeCastMembers, type ThemeId } from '@/scene/office/themeRegistry';
+import { getTheme, resolveThemeCharacter, themeCastMembers, type ThemeId } from '@/scene/office/themeRegistry';
 
 const GOD_ID = 'god';
 /** Accent palette for MAIN-spawned (voice-hired) agents — picked deterministically
@@ -897,12 +897,13 @@ export function useHive(config: HarnessConfig | null): void {
       if (useStore.getState().agents.some((a) => a.id === rec.id)) return;
       const key = (rec.name || rec.id).toLowerCase();
       const activeThemeId = useStore.getState().officeTheme;
-      const theme = getTheme(activeThemeId);
       const activeCast = themeCastMembers(activeThemeId);
-      const character =
-        activeCast.find((m) => m.name === key || m.displayName.toLowerCase() === key)?.name ??
-        theme.cast.defaultCharacter ??
-        DEFAULT_CHARACTER;
+      const matchedCharacter =
+        activeCast.find((m) => m.name === key || m.displayName.toLowerCase() === key)?.name;
+      const character = resolveThemeCharacter(activeThemeId, {
+        id: rec.id,
+        character: matchedCharacter ?? DEFAULT_CHARACTER,
+      });
       let h = 0;
       for (const ch of rec.id) h = (h + ch.charCodeAt(0)) % SPAWN_ACCENTS.length;
       const project = (rec.cwd || '').split(/[\\/]/).filter(Boolean).pop() || 'hive';

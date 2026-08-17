@@ -26,6 +26,7 @@ import {
   type OfficeCharacterName,
   type PlanetExpressCharacterName,
 } from './cast';
+import { resolveThemeCharacter as resolveThemeCharacterForTheme } from './themeCharacterResolver';
 
 import officeTilesetUrl from '@/assets/tilesets/office-tileset.png?url';
 import a5FloorsWallsUrl from '@/assets/tilesets/a5-office-floors-walls.png?url';
@@ -345,4 +346,11 @@ export function getTheme(id: ThemeId): ThemeConfig {
 
 export function themeCastMembers(id: ThemeId): CastMember<CharacterName>[] {
   return Object.values(getTheme(id).cast.byName) as CastMember<CharacterName>[];
+}
+
+export function resolveThemeCharacter(
+  id: ThemeId,
+  subject: { id: string; character?: CharacterName; isGod?: boolean },
+): CharacterName {
+  return resolveThemeCharacterForTheme(getTheme(id), subject);
 }
